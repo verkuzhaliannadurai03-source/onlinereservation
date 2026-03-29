@@ -1,0 +1,323 @@
+javimportax.swing.*;
+import java.awt.*;
+import java.util.*;
+
+public class Main {
+
+  JFrame frame;
+  JTextField userField;
+  JPasswordField passField;
+  String loggedUser = "";
+
+  JTextField passengerField, trainField, fromField, toField, dateField;
+  JTextField pnrField;
+
+  // Store login users
+  HashMap<String, String> users = new HashMap<>();
+
+  // Store reservations
+  HashMap<Integer, Reservation> reservations = new HashMap<>();
+
+  public Main() {
+    frame = new JFrame("Online Reservation System");
+    frame.setSize(600, 500);
+    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+    loginPage();
+    frame.setVisible(true);
+  }
+
+  // LOGIN PAGE
+  void loginPage() {
+
+    frame.getContentPane().removeAll();
+
+    JPanel panel = new JPanel();
+    panel.setLayout(null);
+
+    JLabel title = new JLabel("Login Page");
+    title.setBounds(230, 30, 200, 30);
+
+    JLabel userLabel = new JLabel("Username:");
+    userLabel.setBounds(150, 120, 100, 30);
+
+    userField = new JTextField();
+    userField.setBounds(250, 120, 180, 30);
+
+    JLabel passLabel = new JLabel("Password:");
+    passLabel.setBounds(150, 170, 100, 30);
+
+    passField = new JPasswordField();
+    passField.setBounds(250, 170, 180, 30);
+
+    JButton loginBtn = new JButton("Login");
+    loginBtn.setBounds(250, 240, 100, 35);
+
+    JButton signupBtn = new JButton("Sign Up");
+    signupBtn.setBounds(250, 290, 100, 35);
+
+    loginBtn.addActionListener(e -> loginUser());
+    signupBtn.addActionListener(e -> signupUser());
+
+    panel.add(title);
+    panel.add(userLabel);
+    panel.add(userField);
+    panel.add(passLabel);
+    panel.add(passField);
+    panel.add(loginBtn);
+    panel.add(signupBtn);
+
+    frame.add(panel);
+    frame.revalidate();
+    frame.repaint();
+  }
+
+  // SIGNUP
+  void signupUser() {
+
+    String username = userField.getText();
+    String password = String.valueOf(passField.getPassword());
+
+    if (users.containsKey(username)) {
+      JOptionPane.showMessageDialog(frame, "Username already exists!");
+    } else {
+      users.put(username, password);
+      JOptionPane.showMessageDialog(frame, "Signup Successful! Now Login.");
+    }
+  }
+
+  // LOGIN
+  void loginUser() {
+
+    String username = userField.getText();
+    String password = String.valueOf(passField.getPassword());
+
+    if (users.containsKey(username) && users.get(username).equals(password)) {
+
+      loggedUser = username;
+
+      JOptionPane.showMessageDialog(frame, "Login Successful! Welcome " + loggedUser);
+
+      showMainMenu();
+
+    } else {
+      JOptionPane.showMessageDialog(frame, "Invalid Username or Password!");
+    }
+  }
+
+  // MAIN MENU
+  void showMainMenu() {
+
+    frame.getContentPane().removeAll();
+
+    JPanel panel = new JPanel();
+    panel.setLayout(null);
+
+    JLabel welcome = new JLabel("Welcome, " + loggedUser);
+    welcome.setBounds(200, 50, 300, 30);
+
+    JButton reservationBtn = new JButton("Reservation Form");
+    reservationBtn.setBounds(200, 130, 200, 50);
+
+    JButton cancelBtn = new JButton("Cancellation Form");
+    cancelBtn.setBounds(200, 210, 200, 50);
+
+    reservationBtn.addActionListener(e -> showReservationForm());
+    cancelBtn.addActionListener(e -> showCancellationForm());
+
+    panel.add(welcome);
+    panel.add(reservationBtn);
+    panel.add(cancelBtn);
+
+    frame.add(panel);
+    frame.revalidate();
+    frame.repaint();
+  }
+
+  // RESERVATION FORM
+  void showReservationForm() {
+
+    frame.getContentPane().removeAll();
+
+    JPanel panel = new JPanel();
+    panel.setLayout(null);
+
+    JLabel title = new JLabel("Reservation Form");
+    title.setBounds(220, 30, 200, 30);
+
+    JLabel passengerLabel = new JLabel("Passenger Name:");
+    passengerLabel.setBounds(100, 100, 120, 30);
+
+    passengerField = new JTextField();
+    passengerField.setBounds(250, 100, 200, 30);
+
+    JLabel trainLabel = new JLabel("Train Name:");
+    trainLabel.setBounds(100, 150, 120, 30);
+
+    trainField = new JTextField();
+    trainField.setBounds(250, 150, 200, 30);
+
+    JLabel fromLabel = new JLabel("From Station:");
+    fromLabel.setBounds(100, 200, 120, 30);
+
+    fromField = new JTextField();
+    fromField.setBounds(250, 200, 200, 30);
+
+    JLabel toLabel = new JLabel("To Station:");
+    toLabel.setBounds(100, 250, 120, 30);
+
+    toField = new JTextField();
+    toField.setBounds(250, 250, 200, 30);
+
+    JLabel dateLabel = new JLabel("Journey Date:");
+    dateLabel.setBounds(100, 300, 120, 30);
+
+    dateField = new JTextField();
+    dateField.setBounds(250, 300, 200, 30);
+
+    JButton submitBtn = new JButton("Submit Reservation");
+    submitBtn.setBounds(220, 370, 180, 40);
+
+    JButton backBtn = new JButton("Back");
+    backBtn.setBounds(20, 20, 80, 30);
+
+    submitBtn.addActionListener(e -> reserveTicket());
+    backBtn.addActionListener(e -> showMainMenu());
+
+    panel.add(title);
+    panel.add(passengerLabel);
+    panel.add(passengerField);
+    panel.add(trainLabel);
+    panel.add(trainField);
+    panel.add(fromLabel);
+    panel.add(fromField);
+    panel.add(toLabel);
+    panel.add(toField);
+    panel.add(dateLabel);
+    panel.add(dateField);
+    panel.add(submitBtn);
+    panel.add(backBtn);
+
+    frame.add(panel);
+    frame.revalidate();
+    frame.repaint();
+  }
+
+  // GENERATE PNR
+  int generatePNR() {
+    Random r = new Random();
+    return 100000 + r.nextInt(900000);
+  }
+
+  // RESERVE TICKET
+  void reserveTicket() {
+
+    int pnr = generatePNR();
+
+    Reservation r = new Reservation(
+            passengerField.getText(),
+            trainField.getText(),
+            fromField.getText(),
+            toField.getText(),
+            dateField.getText()
+    );
+
+    reservations.put(pnr, r);
+
+    JOptionPane.showMessageDialog(frame,
+            "Ticket Reserved Successfully!\nPNR Number: " + pnr);
+  }
+
+  // CANCELLATION FORM
+  void showCancellationForm() {
+
+    frame.getContentPane().removeAll();
+
+    JPanel panel = new JPanel();
+    panel.setLayout(null);
+
+    JLabel title = new JLabel("Cancellation Form");
+    title.setBounds(220, 50, 200, 30);
+
+    JLabel pnrLabel = new JLabel("Enter PNR Number:");
+    pnrLabel.setBounds(120, 150, 150, 30);
+
+    pnrField = new JTextField();
+    pnrField.setBounds(270, 150, 180, 30);
+
+    JButton fetchBtn = new JButton("Fetch Ticket");
+    fetchBtn.setBounds(220, 220, 150, 40);
+
+    JButton backBtn = new JButton("Back");
+    backBtn.setBounds(20, 20, 80, 30);
+
+    fetchBtn.addActionListener(e -> fetchTicket());
+    backBtn.addActionListener(e -> showMainMenu());
+
+    panel.add(title);
+    panel.add(pnrLabel);
+    panel.add(pnrField);
+    panel.add(fetchBtn);
+    panel.add(backBtn);
+
+    frame.add(panel);
+    frame.revalidate();
+    frame.repaint();
+  }
+
+  // FETCH TICKET
+  void fetchTicket() {
+
+    int pnr = Integer.parseInt(pnrField.getText());
+
+    if (reservations.containsKey(pnr)) {
+
+      Reservation r = reservations.get(pnr);
+
+      String details =
+              "Passenger: " + r.passenger +
+                      "\nTrain: " + r.train +
+                      "\nFrom: " + r.from +
+                      "\nTo: " + r.to +
+                      "\nDate: " + r.date;
+
+      int confirm = JOptionPane.showConfirmDialog(frame,
+              details + "\n\nCancel this ticket?",
+              "Confirm Cancellation",
+              JOptionPane.YES_NO_OPTION);
+
+      if (confirm == JOptionPane.YES_OPTION) {
+
+        reservations.remove(pnr);
+
+        JOptionPane.showMessageDialog(frame,
+                "Ticket Cancelled Successfully!");
+      }
+
+    } else {
+      JOptionPane.showMessageDialog(frame, "Invalid PNR Number!");
+    }
+  }
+
+  public static void main(String[] args) {
+    new Main();
+  }
+}
+
+// Reservation class
+class Reservation {
+
+  String passenger;
+  String train;
+  String from;
+  String to;
+  String date;
+
+  Reservation(String p, String t, String f, String to, String d) {
+    passenger = p;
+    train = t;
+    from = f;
+    this.to = to;
+    date = d;
+  }
+}
